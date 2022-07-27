@@ -1,0 +1,74 @@
+
+##This rule is used to send alerte to slack when a host is down. I use heartbeat index here
+
+# Alert when the rate of events exceeds a threshold
+
+# (Optional)
+# Elasticsearch host
+es_host: x.x.x.x
+
+# (Optional)
+# Elasticsearch port
+es_port: 9200
+
+# (OptionaL) Connect with SSL to Elasticsearch
+#use_ssl: True
+
+# (Optional) basic-auth username and password for Elasticsearch
+es_username: #####
+es_password: ##########
+
+# (Required)
+# Rule name, must be unique
+name: Host Down
+
+# (Required)
+# Type of alert.
+# the frequency rule type alerts when num_events events occur with timeframe time
+type: any
+#type: frequency
+
+# (Required)
+# Index to search, wildcard supported
+index: heartbeat-*
+
+num_events: 1
+
+# num_events must occur within this amount of time to trigger an alert
+timeframe:
+  minutes: 1
+
+
+filter:
+- query:
+    query_string:
+      query: "(monitor.type: icmp) AND (monitor.status: down)"
+
+
+# When the attacker continues, send a new alert after x minutes
+realert:
+  minutes: 1
+
+
+include:
+  - agent.hostname
+
+include_match_in_root: true
+
+alert_subject: "{} is down"
+alert_subject_args:
+  - agent.hostname
+  #- kibana_link
+
+alert_text: |-
+  The host {} is down.
+alert_text_args:
+  - agent.hostname
+
+
+# (Required)
+# The alert is use when a match is found
+alert:
+  - slack:
+      slack_webhook_url: "https://hooks.slack.com/service/..."
+      slack_username_override: "...."

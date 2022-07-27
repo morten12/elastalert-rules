@@ -1,0 +1,59 @@
+name: Cpu usage above than 85%
+#type: percentage_match
+
+
+
+# Elasticsearch host
+es_host: x.x.x.x
+
+# (Optional)
+# Elasticsearch port
+es_port: 9200
+
+es_username: #####
+es_password: #########
+
+type: frequency
+
+
+num_events: 3
+
+timeframe:
+  hours: 1
+
+realert:
+  hours: 3
+
+
+index: metricbeat-*
+description: "When CPU usage between 85-100%"
+
+#filter:
+#- term:
+#   _type: host.cpu.usage
+
+filter:
+- range:
+    host.cpu.usage:
+      from: 0.85
+      to: 1
+
+alert_subject_args:
+  - match_body.host.hostname
+  - kibana_link
+
+include:
+  - host.hostname
+  - host.ip
+  - host.cpu.usage
+
+
+#query_key: Hostname.keyword
+doc_type: host.cpu.usage
+
+
+
+alert:
+  - slack:
+      slack_webhook_url: "https://hooks.slack.com/services/..."
+      slack_username_override: "..."
